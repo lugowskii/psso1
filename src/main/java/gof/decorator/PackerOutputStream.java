@@ -1,9 +1,12 @@
 package main.java.gof.decorator;
 
 import java.io.*;
+import java.util.Arrays;
 
 public class PackerOutputStream extends FilterOutputStream {
 
+
+    private static final int FILTER_BITS = 6;
     /**
      * Creates an output stream filter built on top of the specified
      * underlying output stream.
@@ -24,14 +27,18 @@ public class PackerOutputStream extends FilterOutputStream {
 
     @Override
     public void write(byte[] b) throws IOException {
-        super.write(encode(new String(b),6));
-
+        super.write(encode(new String(b),FILTER_BITS));
     }
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        byte[] encoded = encode(new String(b),6);
-        super.write(encoded, off*encoded.length/b.length, encoded.length);
+        byte[] encoded = encode(new String(Arrays.copyOfRange(b, 0, len)),FILTER_BITS);
+        /*
+        if (encoded.length == 3){
+            super.write(Arrays.copyOfRange(encoded, 0, 1), off*encoded.length/b.length, 1);
+        }
+        else */
+        super.write(encoded, off*encoded.length/len, encoded.length);
     }
 
     @Override
@@ -78,7 +85,7 @@ public class PackerOutputStream extends FilterOutputStream {
         return encoded;
     }
 
-    int toValue(char ch){
+    private int toValue(char ch){
         int chaVal = 0;
         switch(ch){
             case' ':chaVal=0;break; case'a':chaVal=1;break;

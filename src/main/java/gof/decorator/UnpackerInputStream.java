@@ -1,40 +1,40 @@
 package main.java.gof.decorator;
 
 import java.io.*;
-import java.math.BigInteger;
+import java.util.Arrays;
 
 public class UnpackerInputStream extends FilterInputStream {
 
+    private static final int FILTER_BITS = 6;
 
-    /**
-     * Creates a <code>FilterInputStream</code>
-     * by assigning the  argument <code>in</code>
-     * to the field <code>this.in</code> so as
-     * to remember it for later use.
-     *
-     * @param in the underlying input stream, or <code>null</code> if
-     *           this instance is to be created without an underlying stream.
-     */
     public UnpackerInputStream(InputStream in) {
         super(in);
     }
 
     @Override
     public int read() throws IOException {
-        return super.read();
+        return in.read();
     }
 
     @Override
-    public int read(byte[] b) throws IOException {
-        String decoded = decode(BigInteger.valueOf(in.read()).toByteArray(), 6);
-        b = decoded.getBytes();
-        return decoded.getBytes().length;
+    public int read(byte[] resultArray) throws IOException {
+        int encodedArrayLength = resultArray.length*FILTER_BITS/8;
+        byte[] array = new byte[encodedArrayLength];
+        int result = super.read(array, 0, encodedArrayLength);
+        if (result == -1) {
+            return result;
+        }
+        String decoded = decode(Arrays.copyOfRange(array, 0, result), FILTER_BITS);
+        byte[] decodedBytes = decoded.getBytes();
+        for(int i=0; i<decodedBytes.length; i++){
+            resultArray[i] = decodedBytes[i];
+        }
+        return decodedBytes.length;
     }
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        byte[] decoded = decode(b, 6).getBytes();
-        return super.read(decoded, off*decoded.length/b.length, decoded.length);
+        return super.read(b, off, len);
     }
 
     @Override
@@ -67,7 +67,7 @@ public class UnpackerInputStream extends FilterInputStream {
         return super.markSupported();
     }
 
-    String decode(byte[] encoded, int bit){
+    private String decode(byte[] encoded, int bit){
         String strTemp = new String("");
         String strBinary = new String("");
         String strText = new String("");
@@ -85,13 +85,15 @@ public class UnpackerInputStream extends FilterInputStream {
             strBinary = strBinary+strTemp;
         }
         for(int i=0 ; i<strBinary.length();i=i+bit){
-            tempInt = tempInt.valueOf(strBinary.substring(i,i+bit),2);
-            strText = strText + toChar(tempInt.intValue());
+            if (i+bit <=strBinary.length()) {
+                tempInt = tempInt.valueOf(strBinary.substring(i, i + bit), 2);
+                strText = strText + toChar(tempInt.intValue());
+            }
         }
         return strText;
     }
 
-    char toChar(int val){
+    private char toChar(int val){
         char ch = ' ';
         switch(val){
             case 0:ch=' ';break; case 1:ch='a';break;
