@@ -61,7 +61,15 @@ public class PackerOutputStream extends FilterOutputStream {
             tmpRet1=5.0f;
             tmpRet2=8.0f;
         }
-        byte encoded[]=new byte[(int)(tmpRet1*Math.ceil(length/tmpRet2))];
+        //byte encoded[]=new byte[(int)(tmpRet1*Math.ceil(length/tmpRet2))];
+        int encodedLength = (int)Math.ceil(length*bit/8.0);//(int)Math.ceil(length*bit/8.0);
+        /*if (encodedLength  == 0){
+            encodedLength = 1;
+        }
+        else if (encodedLength % 8 != 0){
+            encodedLength += 8-(Math.ceil(length*bit/8.0) %8);
+        }*/
+        byte encoded[]=new byte[encodedLength];
         char str[]=new char[length];
         txt.getChars(0,length,str,0);
         int chaVal = 0;
