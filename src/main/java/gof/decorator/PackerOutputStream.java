@@ -5,7 +5,6 @@ import java.util.Arrays;
 
 public class PackerOutputStream extends FilterOutputStream {
 
-
     private static final int FILTER_BITS = 6;
     /**
      * Creates an output stream filter built on top of the specified
@@ -22,12 +21,12 @@ public class PackerOutputStream extends FilterOutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        super.write(b);
+        write(b);
     }
 
     @Override
     public void write(byte[] b) throws IOException {
-        super.write(encode(new String(b),FILTER_BITS));
+        out.write(encode(new String(b),FILTER_BITS));
     }
 
     @Override
@@ -38,7 +37,7 @@ public class PackerOutputStream extends FilterOutputStream {
             super.write(Arrays.copyOfRange(encoded, 0, 1), off*encoded.length/b.length, 1);
         }
         else */
-        super.write(encoded, off*encoded.length/len, encoded.length);
+        out.write(encoded, off*encoded.length/len, encoded.length);
     }
 
     @Override

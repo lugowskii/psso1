@@ -20,7 +20,7 @@ public class UnpackerInputStream extends FilterInputStream {
     public int read(byte[] resultArray) throws IOException {
         int encodedArrayLength = resultArray.length*FILTER_BITS/8;
         byte[] array = new byte[encodedArrayLength];
-        int result = super.read(array, 0, encodedArrayLength);
+        int result = in.read(array, 0, encodedArrayLength);
         if (result == -1) {
             return result;
         }
@@ -34,22 +34,22 @@ public class UnpackerInputStream extends FilterInputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        return super.read(b, off, len);
+        return in.read(b, off, len);
     }
 
     @Override
     public long skip(long n) throws IOException {
-        return super.skip(n);
+        return in.skip(n);
     }
 
     @Override
     public int available() throws IOException {
-        return super.available();
+        return in.available();
     }
 
     @Override
     public void close() throws IOException {
-        super.close();
+        in.close();
     }
 
     @Override
@@ -59,7 +59,7 @@ public class UnpackerInputStream extends FilterInputStream {
 
     @Override
     public synchronized void reset() throws IOException {
-        super.reset();
+        in.reset();
     }
 
     @Override
