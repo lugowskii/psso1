@@ -1,11 +1,16 @@
 package main.java.gof.decorator;
 
-import java.io.*;
-import java.util.Arrays;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CipherInputStream extends FilterInputStream {
 
-    private RC4 rc4Encryptor = new RC4(new byte[0]);
+    private RC4V2 rc4Encryptor = new RC4V2("SECRETKEY".getBytes(), 1000, null);
+
+    private List<Byte> buffer = new ArrayList<>(32);
 
     public CipherInputStream(InputStream in) {
         super(in);
@@ -18,62 +23,23 @@ public class CipherInputStream extends FilterInputStream {
 
     @Override
     public int read(byte[] b) throws IOException {
-        int encodedArrayLength = 2 * b.length;
+        return read(b, 0, b.length);
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        int encodedArrayLength = b.length;
         byte[] array = new byte[encodedArrayLength];
         int result = in.read(array, 0, encodedArrayLength);
         if (result == -1) {
             return result;
         }
-        String decoded = rc4Encryptor.decrypt(new String(Arrays.copyOfRange(array, 0, result)));
-        byte[] decodedBytes = decoded.getBytes();
-        for(int i=0; i<decodedBytes.length; i++){
-            b[i] = decodedBytes[i];
+        byte[] decodedBytes = rc4Encryptor.decrypt(array, 0, array.length);
+        for (int j = 0; j < result; j++) {
+            b[j] = decodedBytes[j];
         }
-        return decodedBytes.length;
+
+        return result;
     }
 
-    @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        byte[] array = new byte[2 * b.length];
-        int result = in.read(array, 0, 2 * b.length);
-        if (result == -1) {
-            return result;
-        }
-        String decoded = rc4Encryptor.decrypt(new String(Arrays.copyOfRange(array, 0, result)));
-        byte[] decodedBytes = decoded.getBytes();
-        for(int i=0; i< decodedBytes.length; i++){
-            b[i] = decodedBytes[i];
-        }
-        return decodedBytes.length;
-    }
-
-    @Override
-    public long skip(long n) throws IOException {
-        return super.skip(n);
-    }
-
-    @Override
-    public int available() throws IOException {
-        return super.available();
-    }
-
-    @Override
-    public void close() throws IOException {
-        super.close();
-    }
-
-    @Override
-    public synchronized void mark(int readlimit) {
-        super.mark(readlimit);
-    }
-
-    @Override
-    public synchronized void reset() throws IOException {
-        super.reset();
-    }
-
-    @Override
-    public boolean markSupported() {
-        return super.markSupported();
-    }
 }

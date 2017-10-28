@@ -1,23 +1,16 @@
 package main.java.gof.decorator;
 
-import javax.crypto.Cipher;
-import javax.crypto.CipherSpi;
 
-import org.bouncycastle.crypto.CipherParameters;
-import org.bouncycastle.crypto.engines.RC4Engine;
-import org.bouncycastle.crypto.params.KeyParameter;
-
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class CipherOutputStream extends FilterOutputStream {
 
-    private RC4 rc4Encryptor = new RC4(new byte[0]);
-    RC4Engine engine = new RC4Engine();
-    CipherParameters params = new KeyParameter("Key".getBytes());
+    private RC4V2 rc4Encryptor = new RC4V2("SECRETKEY".getBytes(), 1000, null);
 
     public CipherOutputStream(OutputStream out) {
         super(out);
-        engine.init(true, params);
     }
 
     @Override
@@ -27,25 +20,14 @@ public class CipherOutputStream extends FilterOutputStream {
 
     @Override
     public void write(byte[] b) throws IOException {
-        //byte[] encrypted = rc4Encryptor.encrypt(new String(b)).getBytes();
-        engine.processBytes()
-        byte[] encrypted = engine. .encrypt(new String(b)).getBytes();
+        byte[] encrypted = rc4Encryptor.encrypt(b, 0, b.length);
         out.write(encrypted);
     }
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        byte[] encrypted = rc4Encryptor.encrypt(new String(b)).getBytes();
-        out.write(encrypted, off*encrypted.length/len, encrypted.length);
+        byte[] encrypted = rc4Encryptor.encrypt(b, off, len);
+        out.write(encrypted, off * encrypted.length / len, len);
     }
 
-    @Override
-    public void flush() throws IOException {
-        out.flush();
-    }
-
-    @Override
-    public void close() throws IOException {
-        out.close();
-    }
 }

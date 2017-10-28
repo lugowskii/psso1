@@ -13,7 +13,7 @@ public class RC4 {
 
     public RC4(byte[] key) {
         if (key.length == 0) {
-            key = "Key".getBytes();
+            key = "SECRETKEY".getBytes();
         }
         if (key.length < 1 || key.length > 256) {
             throw new IllegalArgumentException("key must be between 1 and 256 bytes");
