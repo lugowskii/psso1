@@ -3,14 +3,10 @@ package main.java.gof.decorator;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CipherInputStream extends FilterInputStream {
 
-    private RC4V2 rc4Encryptor = new RC4V2("SECRETKEY".getBytes(), 1000, null);
-
-    private List<Byte> buffer = new ArrayList<>(32);
+    private RC4 rc4 = new RC4(true);
 
     public CipherInputStream(InputStream in) {
         super(in);
@@ -28,17 +24,14 @@ public class CipherInputStream extends FilterInputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        int encodedArrayLength = b.length;
-        byte[] array = new byte[encodedArrayLength];
-        int result = in.read(array, 0, encodedArrayLength);
+        byte[] array = new byte[b.length];
+        int result = in.read(array, 0, array.length);
         if (result == -1) {
             return result;
         }
-        byte[] decodedBytes = rc4Encryptor.decrypt(array, 0, array.length);
-        for (int j = 0; j < result; j++) {
-            b[j] = decodedBytes[j];
-        }
-
+        byte[] decodedBytes = new byte[array.length];
+        rc4.processBytes(array, 0, array.length, decodedBytes, 0);
+        System.arraycopy(decodedBytes, 0, b, 0, decodedBytes.length);
         return result;
     }
 

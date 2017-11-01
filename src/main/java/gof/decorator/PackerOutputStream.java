@@ -15,7 +15,7 @@ public class PackerOutputStream extends FilterOutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        write(b);
+        write(new byte[]{(byte) b});
     }
 
     @Override
@@ -29,16 +29,6 @@ public class PackerOutputStream extends FilterOutputStream {
         out.write(encoded, off * encoded.length / len, encoded.length);
     }
 
-    @Override
-    public void flush() throws IOException {
-        super.flush();
-    }
-
-    @Override
-    public void close() throws IOException {
-        super.close();
-    }
-
     byte[] encode(String txt, int bit) {
         int length = txt.length();
         float tmpRet1 = 0, tmpRet2 = 0;
@@ -49,14 +39,7 @@ public class PackerOutputStream extends FilterOutputStream {
             tmpRet1 = 5.0f;
             tmpRet2 = 8.0f;
         }
-        //byte encoded[]=new byte[(int)(tmpRet1*Math.ceil(length/tmpRet2))];
-        int encodedLength = (int) Math.ceil(length * bit / 8.0);//(int)Math.ceil(length*bit/8.0);
-        /*if (encodedLength  == 0){
-            encodedLength = 1;
-        }
-        else if (encodedLength % 8 != 0){
-            encodedLength += 8-(Math.ceil(length*bit/8.0) %8);
-        }*/
+        int encodedLength = (int) Math.ceil(length * bit / 8.0);
         byte encoded[] = new byte[encodedLength];
         char str[] = new char[length];
         txt.getChars(0, length, str, 0);
@@ -75,7 +58,7 @@ public class PackerOutputStream extends FilterOutputStream {
         }
         Integer tempInt = new Integer(0);
         for (int i = 0; i < strBinary.length(); i = i + 8) {
-            tempInt = tempInt.valueOf(strBinary.substring(i, i + 8), 2);
+            tempInt = Integer.valueOf(strBinary.substring(i, i + 8), 2);
             encoded[i / 8] = tempInt.byteValue();
         }
         return encoded;

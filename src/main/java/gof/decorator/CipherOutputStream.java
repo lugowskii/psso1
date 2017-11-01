@@ -7,7 +7,7 @@ import java.io.OutputStream;
 
 public class CipherOutputStream extends FilterOutputStream {
 
-    private RC4V2 rc4Encryptor = new RC4V2("SECRETKEY".getBytes(), 1000, null);
+    private RC4 rc4 = new RC4(true);
 
     public CipherOutputStream(OutputStream out) {
         super(out);
@@ -15,18 +15,18 @@ public class CipherOutputStream extends FilterOutputStream {
 
     @Override
     public void write(int b) throws IOException {
-        out.write(b);
+        write(new byte[]{(byte)b});
     }
 
     @Override
     public void write(byte[] b) throws IOException {
-        byte[] encrypted = rc4Encryptor.encrypt(b, 0, b.length);
-        out.write(encrypted);
+        write(b, 0, b.length);
     }
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        byte[] encrypted = rc4Encryptor.encrypt(b, off, len);
+        byte[] encrypted = new byte[b.length];
+        rc4.processBytes(b, 0, b.length, encrypted, 0);
         out.write(encrypted, off * encrypted.length / len, len);
     }
 
